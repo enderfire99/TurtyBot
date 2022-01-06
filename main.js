@@ -15,7 +15,7 @@ const Discord = require('discord.js');
 //aplicamos client a nuestro bot
 const turty = new Discord.Client({ 
     intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_MEMBERS'], 
-    partials: ['MESSAGE', 'REACTION', 'USER', 'CHANNEL']
+    partials: ['MESSAGE', 'REACTION', 'USER']
 });
 
 //procesar futuros commandos con prefix #

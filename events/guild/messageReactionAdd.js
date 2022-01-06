@@ -98,7 +98,7 @@ module.exports = (turty, Discord, reaction, user) =>
                 pete.roles.add('789159347694993459');
                 break;
 
-            case 'bochiwaifu:865763531575132170':
+            case 'bochiwaifu':
                 pete.roles.add('772654571439915069');
                 break;
         }

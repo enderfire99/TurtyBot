@@ -1,10 +1,7 @@
-<<<<<<< Updated upstream
-const reactionRoleSchema = require("../models/reactionRoleSchema");
-=======
 require('dotenv').config();
 
 const reactionRoleModel = require("../models/reactionRoleSchema");
->>>>>>> Stashed changes
+
 
 
 
@@ -23,6 +20,14 @@ module.exports = {
             return m.author.id === message.author.id
         }
 
+        const emoji_filter = m => {
+            return m.author.id === message.author.id
+        }
+
+        const action_filter = (reaction, user) => {
+            return user.id === message.author.id && (reaction.emoji.name === '🇦' || reaction.emoji.name === '🇧' || reaction.emoji.name === '🇨');
+        }
+
         const collector = message.channel.createMessageCollector({
             filter, time: 1000 * 20, max: 1
         })
@@ -33,9 +38,7 @@ module.exports = {
             collected.forEach(message => {
                 if (message.guild.channels.cache.has(message.content))
                 {
-<<<<<<< Updated upstream
                     message.channel.send('existe')
-=======
                     id_channel = message.guild.channels.cache.get(message.content);
 
                     message.channel.send('selecciono su canal, que mensaje es?')
@@ -194,7 +197,6 @@ module.exports = {
                             }
                         });
                     });
->>>>>>> Stashed changes
                 }
                 else
                 {

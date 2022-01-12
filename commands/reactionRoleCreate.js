@@ -39,7 +39,8 @@ module.exports = {
                 if (message.guild.channels.cache.has(message.content))
                 {
                     message.channel.send('existe')
-                    id_channel = message.guild.channels.cache.get(message.content);
+                    channel_search = message.guild.channels.cache.get(message.content);
+                    id_channel = message.content;
 
                     message.channel.send('selecciono su canal, que mensaje es?')
 
@@ -54,7 +55,7 @@ module.exports = {
                         msg_error = true;
 
                         collected.forEach(async message => {
-                            await id_channel.messages.fetch(message.content).then(
+                            await channel_search.messages.fetch(message.content).then(
                                 message => {
                                     id_message = message.content;
                                 }
@@ -181,6 +182,25 @@ module.exports = {
                                                                     await reactionRole.save();
 
                                                                     message.channel.send('se guardo en la base de datos')
+
+                                                                    const regexExp = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi;
+
+                                                                    message.guild.channels.fetch(id_channel).then(channel => {
+                                                                        channel.messages.fetch(id_message).then(message => {
+                                                                            if(regexExp.test(name_emoji))
+                                                                            {
+                                                                                message.react(`${name_emoji}`)
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                const reactionEmoji = message.guild.emojis.cache.find(emoji => emoji.name === name_emoji);
+
+                                                                                console.log(reactionEmoji)
+
+                                                                                message.react(reactionEmoji)
+                                                                            }
+                                                                        });
+                                                                    });
                                                                 }
                                                             });
                                                         });

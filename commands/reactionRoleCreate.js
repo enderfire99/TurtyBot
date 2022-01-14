@@ -1,7 +1,6 @@
 require('dotenv').config();
 
-const reactionRoleModel = require("../models/reactionRoleSchema");
-
+const reactionRoleSchema = require("../models/reactionRoleSchema");
 
 
 
@@ -17,34 +16,29 @@ module.exports = {
         message.channel.send('en que canal esta su mensaje')
 
         const filter = m => {
-            return m.author.id === message.author.id
+            return m.author.id === message.author.id;
         }
 
-        const emoji_filter = m => {
-            return m.author.id === message.author.id
+        const emoji_filter = (user) => {
+            return user.id === message.author.id;
         }
 
-        const action_filter = (reaction, user) => {
-            return user.id === message.author.id && (reaction.emoji.name === '🇦' || reaction.emoji.name === '🇧' || reaction.emoji.name === '🇨');
-        }
+        const collector_channel = message.channel.createMessageCollector({ filter, time: 1000 * 20, max: 1 });
 
-        const collector = message.channel.createMessageCollector({
-            filter, time: 1000 * 30, max: 1
-        })
+        collector_channel.on('collect', m => console.log(`Collected ${m.content} \n`));
 
-        collector.on('collect', m => console.log(`Collected ${m.content} \n`));
+        collector_channel.on('end', async collected => {
+            if(collected.size == 0) message.channel.send("time out")
 
-        collector.on('end', collected => {
             collected.forEach(message => {
                 if (message.guild.channels.cache.has(message.content))
                 {
-                    channel_search = message.guild.channels.cache.get(message.content);
-                    id_channel = message.content;
+                    id_channel = message.guild.channels.cache.get(message.content);
 
                     message.channel.send('selecciono su canal, que mensaje es?')
 
                     const collector_msg = message.channel.createMessageCollector({
-                        filter, time: 1000 * 30, max: 1
+                        filter, time: 1000 * 20, max: 1
                     })
             
                     collector_msg.on('collect', m => console.log(`Collected ${m.content} \n`));
@@ -54,7 +48,7 @@ module.exports = {
                         msg_error = true;
 
                         collected.forEach(async message => {
-                            await channel_search.messages.fetch(message.content).then(
+                            await id_channel.messages.fetch(message.content).then(
                                 message => {
                                     id_message = message.content;
                                 }
@@ -70,7 +64,7 @@ module.exports = {
                             {
                                 message.channel.send('selecciono su mensaje, reaccionar a su anterior mensaje con el emoji que va a usar')
 
-                                const emoji_collector = message.createReactionCollector({ emoji_filter, time: 1000 * 30, max: 1});
+                                const emoji_collector = message.createReactionCollector({ emoji_filter, time: 15000, max: 1});
 
                                emoji_error  = true;
 
@@ -90,7 +84,7 @@ module.exports = {
                                             await message.channel.send('no existe');
                                         });
 
-                                        name_emoji = collected.emoji.name;
+                                        id_emoji = collected.emoji.name;
                                     
                                         if(emoji_error)
                                         {
@@ -104,7 +98,7 @@ module.exports = {
                                                 return (reaction.emoji.name == '🇦' || reaction.emoji.name == '🇧' || reaction.emoji.name == '🇨') && !user.bot && user.id === message.author.id;
                                             }
 
-                                            const action_collector = message.createReactionCollector({ action_filter, time: 1000 * 30, max: 1});
+                                            const action_collector = message.createReactionCollector({ action_filter, time: 15000, max: 1});
 
                                             action_collector.on('collect', (reaction, user) => {
                                                 console.log(`emoji for action Collected ${reaction.emoji.name} from ${user.tag}`);
@@ -125,12 +119,15 @@ module.exports = {
                                                     switch(collected.emoji.name)
                                                     {
                                                         case '🇦':
+                                                            message.channel.send("accion dar")
                                                             id_action = 1;
                                                             break;
                                                         case '🇧':
+                                                            message.channel.send("accion borrar")
                                                             id_action = 2;
                                                             break;
                                                         case '🇨':
+                                                            message.channel.send("accion dar/borrar")
                                                             id_action = 3;
                                                             break;
                                                         default:
@@ -141,7 +138,7 @@ module.exports = {
                                                     {
                                                         message.channel.send('envie el id del rol que quiere');
 
-                                                        const collector_channel = message.channel.createMessageCollector({ filter, time: 1000 * 30, max: 1 });
+                                                        const collector_channel = message.channel.createMessageCollector({ filter, time: 1000 * 20, max: 1 });
 
                                                         collector_channel.on('collect', m => console.log(`Collected ${m.content} \n`));
 
@@ -150,7 +147,7 @@ module.exports = {
 
                                                             rol_error = true;
 
-                                                            collected.forEach(async message => {
+                                                            collected.forEach(message => {
                                                                 message.guild.roles.fetch(message.content).then( role => {
                                                                     id_rol = message.content;
                                                                 }).catch(() => {
@@ -163,36 +160,8 @@ module.exports = {
 
                                                                 if(rol_error)
                                                                 {
-                                                                    message.channel.send(`guild: ${message.guild.id} | channel: ${id_channel} | message: ${id_message} | emoji: ${name_emoji} | action: ${id_action} | rol: ${id_rol}`)
-                                                                    console.log(`guild: ${message.guild.id} | channel: ${id_channel} | message: ${id_message} | emoji: ${name_emoji} | action: ${id_action} | rol: ${id_rol}`)
-
-                                                                    const regexExp = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi;
-
-                                                                    message.guild.channels.fetch(id_channel).then(channel => {
-                                                                        channel.messages.fetch(id_message).then(message => {
-                                                                            if(regexExp.test(name_emoji))
-                                                                            {
-                                                                                message.react(`${name_emoji}`)
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                const reactionEmoji = message.guild.emojis.cache.find(emoji => emoji.name === name_emoji);
-
-                                                                                message.react(reactionEmoji)
-                                                                            }
-                                                                        });
-                                                                    });
-
-                                                                    let reactionRole = await reactionRoleModel.create({
-                                                                        guildID: message.guild.id,
-                                                                        channelID: id_channel,
-                                                                        messageID: id_message,
-                                                                        emojiNAME: name_emoji,
-                                                                        action: id_action,
-                                                                        roleID: id_rol,
-                                                                    });
-
-                                                                    await reactionRole.save();
+                                                                    message.channel.send(`guild: ${message.guild.id} | channel: ${id_channel} | message: ${id_message} | emoji: ${id_emoji} | action: ${id_action} | rol: ${id_rol}`)
+                                                                    console.log(`guild: ${message.guild.id} | channel: ${id_channel} | message: ${id_message} | emoji: ${id_emoji} | action: ${id_action} | rol: ${id_rol}`)
                                                                 }
                                                             });
                                                         });
@@ -210,9 +179,8 @@ module.exports = {
                         });
                     });
                 }
-                else
-                {
-                    message.channel.send('no existe')
+                else{
+                    message.channel.send("eso no es un canal");
                 }
             });
         });

@@ -32,6 +32,7 @@ turty.events = new Discord.Collection();
     require(`./handlers/${handler}`)(turty, Discord);
 });
 
+//proceso de intentarme conectar a moongose, devuelve si es necesario a la consola el error
 mongoose.connect(process.env.MONGO_CONNECT).then(() =>
 {
     console.log('turty esta conectado con MONGO');
